@@ -176,10 +176,13 @@ def build_map(src, dst):
             d = dst[layer][i]
             if not s or not d or s in table:
                 continue
-            # Typing from a non-Latin layout never produced ASCII punctuation
-            # "on purpose" for us to convert, so leave plain ASCII alone.
-            if not latin_src and s.isascii():
+            # Typing from a non-Latin layout rarely produces ASCII punctuation "on purpose",
+            # so leave it alone, unless the same key is a letter on the target layout
+            # (e.g. Shift+D on the Arabic layout types "]", which really is a capital D).
+            if not latin_src and s.isascii() and not d.isalpha():
                 continue
+
+          
             table[s] = d
     return table
 
