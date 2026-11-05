@@ -54,7 +54,27 @@ def _info(c):
     return _finish(img)
 
 
-_DRAW = {"rules": _swap, "keyboards": _keyboard, "settings": _gear, "about": _info}
+def _snippet(c):
+    """A note with text lines."""
+    img = Image.new("RGBA", (_S, _S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((55, 40, 265, 280), radius=34, outline=c, width=22)
+    for y, x2 in ((105, 225), (155, 225), (205, 175)):
+        d.rounded_rectangle((95, y, x2, y + 22), radius=8, fill=c)
+    return _finish(img)
+
+
+def _history(c):
+    """A clock."""
+    img = Image.new("RGBA", (_S, _S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.ellipse((35, 35, 285, 285), outline=c, width=22)
+    d.line([(160, 90), (160, 165), (215, 200)], fill=c, width=22, joint="curve")
+    return _finish(img)
+
+
+_DRAW = {"rules": _swap, "keyboards": _keyboard, "snippets": _snippet, "history": _history,
+         "settings": _gear, "about": _info}
 
 
 def nav_icon(name, color):

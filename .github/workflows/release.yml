@@ -1,0 +1,70 @@
+# Builds the installer on GitHub's own servers, so it can be code-signed (SignPath) and
+# nobody has to trust a file built on a personal PC.
+# It only runs when you push a tag like v1.1.0 (or press "Run workflow"). build.bat still
+# works on your own PC exactly as before.
+name: Release
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tests
+        run: python -m unittest discover -s tests -v
+      - name: Build KeyboardFlip.exe
+        run: |
+          python -m pip install --upgrade -r requirements.txt pyinstaller
+          python make_icon.py
+          python -m PyInstaller --noconfirm --clean --windowed --name KeyboardFlip --icon assets\icon.ico --add-data "assets;assets" --collect-all customtkinter --hidden-import pystray._win32 --hidden-import PIL._tkinter_finder main.py
+      - name: Build the installer
+        run: |
+          choco install innosetup -y --no-progress
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer.iss
+      - uses: actions/upload-artifact@v4
+        id: unsigned
+        with:
+          name: KeyboardFlip_Setup-unsigned
+          path: installer_output/KeyboardFlip_Setup.exe
+
+      # Signing is skipped until SignPath is set up (repository variable SIGNPATH_ORGANIZATION_ID
+      # + secret SIGNPATH_API_TOKEN). Check the input names against the snippet SignPath shows
+      # for your project when you get approved.
+      - name: Sign with SignPath
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: keyboard-flip
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: default
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Choose the file to publish
+        shell: bash
+        run: |
+          mkdir release
+          signed="$(find signed -name KeyboardFlip_Setup.exe 2>/dev/null | head -n 1)"
+          if [ -n "$signed" ]; then cp "$signed" release/; else cp installer_output/KeyboardFlip_Setup.exe release/; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KeyboardFlip_Setup
+          path: release/KeyboardFlip_Setup.exe
+      - name: Create a draft release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" release/KeyboardFlip_Setup.exe --draft --generate-notes --title "Keyboard Flip ${{ github.ref_name }}"

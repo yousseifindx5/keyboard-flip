@@ -24,15 +24,17 @@ def main():
 
     import pystray
     from keyboardflip.assets import tray_icon_image
-    from keyboardflip.config import APP_NAME, load_config
+    from keyboardflip.config import APP_NAME, delete_history_file, load_config
     from keyboardflip.engine import Engine
     from keyboardflip.i18n import set_language, tr
     from keyboardflip.ui import MainWindow
 
+    delete_history_file()  # a history left behind by a crash or a shutdown is removed
     cfg = load_config()
     set_language(cfg["settings"]["ui_language"])
     events = queue.Queue()
     engine = Engine(cfg, lambda text, ok=True: events.put(("toast", text, ok)))
+    engine.request = lambda *args: events.put(args)  # preview box, snippets menu, history refresh
 
     def build_menu():
         return pystray.Menu(
@@ -69,6 +71,7 @@ def main():
     window.mainloop()
     stop.set()
     engine.stop()
+    delete_history_file()  # the program is closing completely: the history goes with it
 
 
 if __name__ == "__main__":

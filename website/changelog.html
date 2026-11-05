@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyboard Flip – Changelog</title>
+<meta name="description" content="What's new in each version of Keyboard Flip.">
+<link rel="canonical" href="https://keyboard-flip.vercel.app/changelog.html">
+<link rel="alternate" hreflang="en" href="https://keyboard-flip.vercel.app/changelog.html">
+<link rel="alternate" hreflang="ar" href="https://keyboard-flip.vercel.app/ar/changelog.html">
+<link rel="alternate" hreflang="x-default" href="https://keyboard-flip.vercel.app/changelog.html">
+<link rel="icon" href="logo.png">
+<script>try{var t=localStorage.getItem("theme");if(!t)t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="dark"}</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="index.html"><img src="logo.png" alt="Keyboard Flip logo">Keyboard Flip</a>
+  <div class="links"><a href="index.html#demo">Try it</a><a href="index.html#features">Features</a><a href="index.html#shortcuts">Shortcuts</a><a href="index.html#download">Download</a><a href="index.html#faq">FAQ</a><a href="changelog.html">Changelog</a></div>
+  <a class="btn small ghost lang" href="ar/changelog.html" hreflang="ar" lang="ar" dir="rtl">العربية</a>
+  <button class="btn small" id="theme" type="button" aria-label="Switch between light and dark mode" data-to-dark="🌙 Dark" data-to-light="☀️ Light" data-title-dark="Switch to dark mode" data-title-light="Switch to light mode"></button>
+</div></nav>
+
+<main class="cl">
+  <a class="back" href="index.html">← Back to Keyboard Flip</a>
+  <h1>Changelog</h1>
+  <p class="sub">What’s new in each version, newest first.</p>
+
+  <article class="rel" id="v1-1-0">
+    <header><h2>1.1.0</h2><span class="tag">Latest</span><span class="date">5 November 2026</span></header>
+    <h3>New</h3>
+    <ul>
+      <li><b>8 new languages:</b> Turkish, Ukrainian, Persian, Hindi, Urdu, Italian, Portuguese and Greek. They are off by default; turn them on in the Keyboards tab.</li>
+      <li><b>Change letter case:</b> a new shortcut, <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>U</kbd>, cycles the selected text through ALL CAPS, Sentence case and all lowercase.</li>
+      <li><b>Snippets menu:</b> a shortcut opens a small list of your saved snippets, such as your email or phone number. Pick one and it is pasted. Snippets are stored only on your PC.</li>
+      <li><b>Preview before replacing:</b> optional, off by default.</li>
+      <li><b>Double-tap Shift or Ctrl:</b> an optional shortcut. Off by default.</li>
+      <li><b>Undo several times:</b> you can now undo up to 10 conversions in a row.</li>
+      <li><b>History:</b> see and copy from your latest conversions. It is saved on your PC only while the program runs and deleted when you quit it completely, and can be turned off or cleared.</li>
+      <li><b>Welcome tour:</b> a short first-run tour with a practice box.</li>
+      <li><b>Look and feel:</b> accent colors, new Midnight and Sand themes.</li>
+      <li><b>New logo</b> and a sharper icon in the taskbar.</li>
+      <li><b>Right-to-left Arabic:</b> with the Arabic interface, the whole window is mirrored.</li>
+      <li><b>Skip apps:</b> choose a program to skip with a normal Browse window.</li>
+      <li><b>Interface in 6 languages:</b> English, Arabic, German, French, Spanish and Russian.</li>
+    </ul>
+    <h3>Privacy and releases</h3>
+    <ul>
+      <li><b>Optional update check:</b> off by default. When you turn it on, it only asks GitHub for the latest version number.</li>
+      <li><b>Builds on GitHub:</b> releases can now be built on GitHub, which prepares the project for free code signing from SignPath.</li>
+    </ul>
+  </article>
+
+  <article class="rel" id="v1-0-1">
+    <header><h2>1.0.1</h2><span class="date">Bug fixes</span></header>
+    <ul>
+      <li>Fixed capital <b>D</b>, <b>F</b>, <b>C</b> and <b>V</b> (typed with Shift) being converted wrongly when switching between English and Arabic.</li>
+    </ul>
+  </article>
+
+  <article class="rel" id="v1-0-0">
+    <header><h2>1.0.0</h2><span class="date">First public release</span></header>
+    <ul>
+      <li>6 languages: Arabic, English, German, French, Spanish and Russian.</li>
+      <li>Up to 10 shortcuts, one for each direction, plus a “both ways” option.</li>
+      <li>Undo, and convert the last word when nothing is selected.</li>
+      <li>Excluded apps, a system tray icon and optional start with Windows.</li>
+      <li>Light and dark themes, with an English and Arabic interface.</li>
+      <li>Fully offline, no telemetry.</li>
+    </ul>
+  </article>
+</main>
+
+<footer><div class="wrap">
+  <a class="brand" href="index.html"><img src="logo.png" alt="">Keyboard Flip</a>
+  <span>Free and open source · © <span id="year">2026</span></span>
+  <span class="flinks"><a href="index.html" style="color:var(--accent)">Home</a><a href="https://github.com/yousseifindx5/keyboard-flip" target="_blank" rel="noopener" style="color:var(--accent)">Source on GitHub</a></span>
+</div></footer>
+
+<script src="site.js"></script>
+</body>
+</html>

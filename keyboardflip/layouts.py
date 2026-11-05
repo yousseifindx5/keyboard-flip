@@ -114,6 +114,16 @@ LAYOUT_INFO = {
     "fr-FR": ("French (AZERTY)", "0000040C", "fr"),
     "es-ES": ("Spanish (Spain)", "0000040A", "es"),
     "es-LA": ("Spanish (Latin America)", "0000080A", "es"),
+    # Added in 1.1: these have no static table, Windows itself tells us what each key types.
+    "tr": ("Turkish (Q)", "0000041F", "tr"),
+    "uk": ("Ukrainian", "00000422", "uk"),
+    "fa": ("Persian", "00000429", "fa"),
+    "hi": ("Hindi (Devanagari INSCRIPT)", "00000439", "hi"),
+    "ur": ("Urdu", "00000420", "ur"),
+    "it": ("Italian", "00000410", "it"),
+    "pt-PT": ("Portuguese (Portugal)", "00000816", "pt"),
+    "pt-BR": ("Portuguese (Brazil ABNT2)", "00010416", "pt"),
+    "el": ("Greek", "00000408", "el"),
 }
 
 LANGUAGES = {
@@ -123,10 +133,25 @@ LANGUAGES = {
     "fr": {"script": "latin", "layouts": ["fr-FR"]},
     "es": {"script": "latin", "layouts": ["es-ES", "es-LA"]},
     "ru": {"script": "cyrillic", "layouts": ["ru"]},
+    "tr": {"script": "latin", "layouts": ["tr"]},
+    "uk": {"script": "cyrillic", "layouts": ["uk"]},
+    "fa": {"script": "arabic", "layouts": ["fa"]},
+    "hi": {"script": "devanagari", "layouts": ["hi"]},
+    "ur": {"script": "arabic", "layouts": ["ur"]},
+    "it": {"script": "latin", "layouts": ["it"]},
+    "pt": {"script": "latin", "layouts": ["pt-PT", "pt-BR"]},
+    "el": {"script": "greek", "layouts": ["el"]},
 }
 
 DEFAULT_LAYOUTS = {"en": "en-US", "ar": "ar-101", "de": "de-DE", "fr": "fr-FR",
-                   "es": "es-ES", "ru": "ru"}
+                   "es": "es-ES", "ru": "ru", "tr": "tr", "uk": "uk", "fa": "fa",
+                   "hi": "hi", "ur": "ur", "it": "it", "pt": "pt-PT", "el": "el"}
+
+# The languages that are switched on for a fresh install (the others are opt-in).
+DEFAULT_LANGUAGES = ["en", "ar", "de", "fr", "es", "ru"]
+
+# Right-to-left scripts: the caret moves the other way when selecting a word.
+RTL_SCRIPTS = frozenset({"arabic"})
 
 
 def _pad(tokens):
@@ -312,5 +337,7 @@ def convert_between(text, src_id, dst_id):
 def script_counts(text):
     ar = sum(1 for c in text if "\u0600" <= c <= "\u06FF" or "\u0750" <= c <= "\u077F")
     cy = sum(1 for c in text if "\u0400" <= c <= "\u04FF")
-    la = sum(1 for c in text if c.isascii() and c.isalpha())
-    return {"arabic": ar, "cyrillic": cy, "latin": la}
+    hi = sum(1 for c in text if "\u0900" <= c <= "\u097F")
+    el = sum(1 for c in text if "\u0370" <= c <= "\u03FF" or "\u1F00" <= c <= "\u1FFF")
+    la = sum(1 for c in text if c.isalpha() and c.isascii())
+    return {"arabic": ar, "cyrillic": cy, "devanagari": hi, "greek": el, "latin": la}

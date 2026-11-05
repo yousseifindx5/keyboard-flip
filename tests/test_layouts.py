@@ -67,7 +67,8 @@ class Hotkeys(unittest.TestCase):
 
     def test_default_config_hotkeys_are_valid_and_unique(self):
         keys = [winapi.normalize_hotkey(r["hotkey"]) for r in config.DEFAULT_CONFIG["rules"]]
-        keys.append(winapi.normalize_hotkey(config.DEFAULT_CONFIG["settings"]["undo_hotkey"]))
+        for name in ("undo_hotkey", "case_hotkey", "snippets_hotkey"):
+            keys.append(winapi.normalize_hotkey(config.DEFAULT_CONFIG["settings"][name]))
         self.assertNotIn("", keys)
         self.assertEqual(len(keys), len(set(keys)))
         self.assertLessEqual(len(config.DEFAULT_CONFIG["rules"]), config.MAX_RULES)

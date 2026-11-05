@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyboard Flip – صلّح الكلام المكتوب بلغة الكيبورد الغلط</title>
+<meta name="description" content="كتبت بلغة الكيبورد الغلط؟ حدّد النص واضغط اختصار، وKeyboard Flip يصلّحه مكانه. برنامج ويندوز مجاني ومفتوح المصدر.">
+<meta property="og:title" content="Keyboard Flip">
+<meta property="og:description" content="صلّح النص المكتوب بلغة الكيبورد الغلط باختصار واحد. مجاني ومفتوح المصدر.">
+<meta property="og:locale" content="ar_AR">
+<link rel="canonical" href="https://keyboard-flip.vercel.app/ar/">
+<link rel="alternate" hreflang="en" href="https://keyboard-flip.vercel.app/">
+<link rel="alternate" hreflang="ar" href="https://keyboard-flip.vercel.app/ar/">
+<link rel="alternate" hreflang="x-default" href="https://keyboard-flip.vercel.app/">
+<link rel="icon" href="../logo.png">
+<script>try{var t=localStorage.getItem("theme");if(!t)t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="dark"}</script>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="#top"><img src="../logo.png" alt="شعار Keyboard Flip">Keyboard Flip</a>
+  <div class="links"><a href="#demo">جرّبه</a><a href="#features">المميزات</a><a href="#shortcuts">الاختصارات</a><a href="#download">التحميل</a><a href="#faq">الأسئلة</a><a href="changelog.html">سجل التغييرات</a></div>
+  <a class="btn small ghost lang" href="../index.html" hreflang="en" lang="en" dir="ltr">English</a>
+  <button class="btn small" id="theme" type="button" aria-label="التبديل بين الوضع الفاتح والداكن" data-to-dark="🌙 داكن" data-to-light="☀️ فاتح" data-title-dark="التحويل للوضع الداكن" data-title-light="التحويل للوضع الفاتح"></button>
+  <a class="btn small nav-star" href="https://github.com/yousseifindx5/keyboard-flip" target="_blank" rel="noopener">★ نجمة <span id="starsNav"></span></a>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <img class="logo" src="../logo.png" alt="شعار Keyboard Flip">
+  <div><span class="pill">مجاني · مفتوح المصدر · ويندوز 10 و11</span></div>
+  <h1>كتبت بلغة غلط؟ <span>صلّحها بضغطة واحدة.</span></h1>
+  <p class="lead">حدّد النص واضغط الاختصار، فيتحوّل للي كنت عايز تكتبه. زي <code dir="ltr">hello</code> ← <code>اثممخ</code> والعكس. مش ترجمة. نفس الأزرار، بس على الكيبورد التاني.</p>
+  <div class="cta">
+    <a class="btn primary" href="#download">⬇ حمّل لويندوز</a>
+    <a class="btn" href="https://github.com/yousseifindx5/keyboard-flip" target="_blank" rel="noopener">★ نجمة على GitHub <span id="stars"></span></a>
+  </div>
+  <p class="meta">14 لغة · شغّال في أي برنامج · من غير إنترنت · من غير حساب</p>
+
+  <div class="anim" id="anim" role="img" aria-label="عرض متحرك توضيحي (مش تسجيل شاشة): بيتكتب النص hello world بالكيبورد الغلط، ثم بيتحدد، ثم Ctrl+Alt+L بيحوّله لعربي. وبعدها Ctrl+Alt+Z بيرجّعه."
+       data-c0="1 · كتبت بلغة الكيبورد الغلط" data-c1="2 · حدّد النص" data-c2="3 · اضغط الاختصار وخلاص، اتصلّح مكانه" data-c3="مش مظبوط؟ اضغط التراجع">
+    <div class="win">
+      <div class="bar"><i></i><i></i><i></i><span>Notes</span></div>
+      <div class="body" id="animBody"><span class="txt"><span class="selbg" id="animSel"></span><b id="animTxt">اثممخ صخقمي</b></span><span class="caret" id="animCaret" style="visibility:hidden"></span></div>
+      <div class="keys">
+        <div class="kg" id="animK1"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>L</kbd><em dir="rtl">إنجليزي ← عربي</em></div>
+        <div class="kg" id="animK2"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Z</kbd><em dir="rtl">تراجع</em></div>
+      </div>
+      <div class="cap" id="animCap" dir="rtl">3 · اضغط الاختصار وخلاص، اتصلّح مكانه</div>
+      <div class="dots"><i></i><i></i><i class="on"></i><i></i></div>
+    </div>
+  </div>
+</div></header>
+
+<section id="demo"><div class="wrap">
+  <span class="eyebrow">جرّبه هنا</span>
+  <h2>اكتب أي حاجة… وشوفها بتتقلب.</h2>
+  <p class="sub">دي نفس فكرة البرنامج، شغّالة في المتصفح. اكتب في الخانة الأولى وشوف نفس الأزرار هتكتب إيه على الكيبورد التاني.</p>
+  <div class="demo" id="converter" data-lbl-en="كيبورد إنجليزي" data-lbl-ar="كيبورد عربي">
+    <div><label id="fromLabel">كيبورد إنجليزي</label><textarea id="inp" spellcheck="false">hello world</textarea></div>
+    <button class="btn swap" id="swap" type="button" title="اعكس الاتجاه">⇄ اعكس</button>
+    <div><label id="toLabel">كيبورد عربي</label><div class="out" id="out" dir="auto"></div></div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <span class="eyebrow">إزاي بيشتغل</span>
+  <h2>تلات ثواني من غير نسخ ولصق.</h2>
+  <div class="grid g3 steps">
+    <div class="card"><h3>حدّد النص</h3><p>حدّد اللي كتبته بلغة غلط. ولو مفيش نص متحدد، هيحوّل آخر كلمة.</p></div>
+    <div class="card"><h3>اضغط الاختصار</h3><p>كل تحويلة ليها اختصار. مثلًا <span dir="ltr"><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>L</kbd></span> من إنجليزي لعربي، وتقدر تغيّره بعدين.</p></div>
+    <div class="card"><h3>اتصلّح مكانه</h3><p>النص بيتبدّل في مكانه، والحافظة (clipboard) بترجع زي ما كانت. مش مظبوط؟ اضغط اختصار التراجع.</p></div>
+  </div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <span class="eyebrow">المميزات</span>
+  <h2>برنامج صغير، بيعمل حاجة واحدة صح.</h2>
+  <div class="grid g3">
+    <div class="card"><div class="ico">⚡</div><h3>سريع</h3><p>بيكلّم ويندوز مباشرة، فالتصليح بيحصل لحظة ما تضغط.</p></div>
+    <div class="card"><div class="ico">🌍</div><h3>14 لغة</h3><p>6 لغات شغّالة من البداية (العربية والإنجليزية والألمانية والفرنسية والإسبانية والروسية). وفعّل التركية والأوكرانية والفارسية والهندية والأردية والإيطالية والبرتغالية واليونانية وقت ما تحتاجها.</p></div>
+    <div class="card"><div class="ico">🎛️</div><h3>لحد 10 اختصارات</h3><p>اعمل اختصار منفصل لكل اتجاه، زي عربي ← إنجليزي أو روسي ← عربي.</p></div>
+    <div class="card"><div class="ico">↩️</div><h3>تراجع أكتر من مرة</h3><p>حوّلت بالغلط؟ اختصار واحد بيرجّعه، وتقدر ترجع لحد 10 تحويلات ورا بعض.</p></div>
+    <div class="card"><div class="ico">🚫</div><h3>استثناء برامج</h3><p>اختار برامج ما يشتغلش جواها أبدًا، زي الـ terminal. وتقدر تضيف أي برنامج.</p></div>
+    <div class="card"><div class="ico">🔒</div><h3>خصوصية</h3><p>مفيش تتبّع. بيشتغل من غير إنترنت، والاستخدام الاختياري الوحيد للإنترنت هو فحص التحديثات، وتقدر تشغّله (مقفول في الأول).</p></div>
+  </div>
+
+  <h3 class="group">أدوات زيادة في نفس البرنامج الصغير</h3>
+  <div class="grid g3 tight">
+    <div class="card"><div class="ico">🔠</div><h3>تغيير حالة الحروف</h3><p>اختصار واحد بيقلب النص المحدد بين كل الحروف كبيرة، وأول حرف في الجملة كبير، وكل الحروف صغيرة.</p></div>
+    <div class="card"><div class="ico">📋</div><h3>اختصارات نصية (Snippets)</h3><p>اختصار بيفتح قايمة صغيرة فيها اللي حفظته، زي إيميلك أو رقم تليفونك. اختار واحد فيتلصق. محفوظة على جهازك بس.</p></div>
+    <div class="card"><div class="ico">👁️</div><h3>معاينة قبل الاستبدال</h3><p>اختيارية. شوف النتيجة الأول وبعدين أكّد. مقفولة في الأول عشان التصليح يفضل بضغطة واحدة.</p></div>
+    <div class="card"><div class="ico">👆</div><h3>ضغطتين على Shift أو Ctrl</h3><p>اختيارية. دوس على المفتاح مرتين بدل اختصار أطول. مقفولة في الأول.</p></div>
+    <div class="card"><div class="ico">🕘</div><h3>سجل التحويلات</h3><p>شوف آخر تحويلاتك وانسخ منها. بيتحفظ على جهازك طول ما البرنامج شغّال بس وبيتمسح لما تقفله خالص، وتقدر تقفله أو تمسحه.</p></div>
+    <div class="card"><div class="ico">🎨</div><h3>شكل على مزاجك</h3><p>ألوان مميزة، ووضع فاتح وداكن وثيمات Midnight وSand.</p></div>
+    <div class="card"><div class="ico">🗣️</div><h3>واجهة بـ 6 لغات</h3><p>الإنجليزية والعربية والألمانية والفرنسية والإسبانية والروسية.</p></div>
+    <div class="card"><div class="ico">🧰</div><h3>هادي في شريط المهام</h3><p>بيفضل في شريط المهام وممكن يشتغل مع ويندوز. وجولة ترحيب قصيرة فيها خانة تجربة بتساعدك تبدأ.</p></div>
+  </div>
+
+  <div class="chips">
+    <div class="chip"><b style="background:#2f6bff">EN</b>الإنجليزية</div>
+    <div class="chip"><b style="background:#059669">AR</b>العربية</div>
+    <div class="chip"><b style="background:#d97706">DE</b>الألمانية</div>
+    <div class="chip"><b style="background:#7c3aed">FR</b>الفرنسية</div>
+    <div class="chip"><b style="background:#dc2626">ES</b>الإسبانية</div>
+    <div class="chip"><b style="background:#0891b2">RU</b>الروسية</div>
+    <div class="chip"><b style="background:#be123c">TR</b>التركية</div>
+    <div class="chip"><b style="background:#ca8a04">UK</b>الأوكرانية</div>
+    <div class="chip"><b style="background:#0d9488">FA</b>الفارسية</div>
+    <div class="chip"><b style="background:#c2410c">HI</b>الهندية</div>
+    <div class="chip"><b style="background:#0f766e">UR</b>الأردية</div>
+    <div class="chip"><b style="background:#16a34a">IT</b>الإيطالية</div>
+    <div class="chip"><b style="background:#ea580c">PT</b>البرتغالية</div>
+    <div class="chip"><b style="background:#0369a1">EL</b>اليونانية</div>
+  </div>
+</div></section>
+
+<section id="shortcuts"><div class="wrap">
+  <span class="eyebrow">الاختصارات</span>
+  <h2>تغيّرها زي ما تحب.</h2>
+  <p class="sub">دي الاختصارات الافتراضية. تقدر تسجّل أي اختصار تحبه جوه البرنامج. وقايمة الـ snippets والمعاينة وضغطتين المفتاح كلها اختيارية وبتظبطها من جوه البرنامج.</p>
+  <div class="table-wrap"><table>
+    <tr><td dir="ltr" style="text-align:right"><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>L</kbd></td><td>إنجليزي ← عربي</td></tr>
+    <tr><td dir="ltr" style="text-align:right"><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>K</kbd></td><td>عربي ← إنجليزي</td></tr>
+    <tr><td dir="ltr" style="text-align:right"><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Z</kbd></td><td>التراجع عن آخر تحويل (اضغط تاني للتراجع عن اللي قبله)</td></tr>
+    <tr><td dir="ltr" style="text-align:right"><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>U</kbd></td><td>تغيير حالة الحروف: كلها كبيرة ← أول حرف في الجملة كبير ← كلها صغيرة</td></tr>
+    <tr><td dir="ltr" style="text-align:right"><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>S</kbd></td><td>فتح قايمة النصوص الجاهزة (النصوص اللي حفظتها)</td></tr>
+  </table></div>
+</div></section>
+
+<section id="download"><div class="wrap">
+  <div class="card os">
+    <span class="eyebrow">التحميل</span>
+    <h2>ملف تثبيت واحد. دوس عليه مرتين وخلاص.</h2>
+    <p class="sub" style="margin:0 auto">من غير Python ولا terminal. بيتثبّت زي أي برنامج وممكن يشتغل مع ويندوز.</p>
+    <a class="btn primary" href="https://github.com/yousseifindx5/keyboard-flip/releases/latest/download/KeyboardFlip_Setup.exe">⬇ حمّل KeyboardFlip_Setup.exe</a>
+    <p class="note">ويندوز 10 / 11 · 64 بت · <a href="https://github.com/yousseifindx5/keyboard-flip/releases/" target="_blank" rel="noopener" style="color:var(--accent)">كل الإصدارات</a> · <a href="changelog.html" style="color:var(--accent)">الجديد في الإصدار</a></p>
+    <p class="note">لو ظهرت رسالة «Windows protected your PC» اضغط <b>More info</b> وبعدين <b>Run anyway</b>. البرنامج جديد ولسه مش موقّع رقميًا (code-signed)، والكود كله مفتوح لو عايز تراجعه.</p>
+  </div>
+</div></section>
+
+<section id="open"><div class="wrap love">
+  <span class="eyebrow">مفتوح المصدر</span>
+  <h2>اتعمل عشان يتشارك.</h2>
+  <p>كنت بكتب بلغة غلط طول الوقت وأصلّح بإيدي، فعملت البرنامج ده لنفسي. وبعدين اكتشفت إني مش لوحدي.</p>
+  <p>مش عايز الخير اللي فيه يفضل معايا لوحدي. بحب أساعد الناس، عشان كده Keyboard Flip مجاني ومفتوح المصدر. استخدمه، اقرا الكود، طوّره، وشاركه مع أي حد محتاجه.</p>
+  <p>لو وفّر عليك كام دقيقة، نجمة على GitHub هي أحلى شكر. وكمان بتساعد ناس أكتر تلاقيه. ⭐</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/yousseifindx5/keyboard-flip" target="_blank" rel="noopener">★ نجمة على GitHub <span id="starsBig"></span></a>
+    <a class="btn" href="mailto:yousseifindx5@gmail.com?subject=Keyboard%20Flip%20idea">اقترح فكرة</a>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <span class="eyebrow">الأسئلة الشائعة</span>
+  <h2>إجابات سريعة.</h2>
+  <details><summary>هو مجاني فعلًا؟</summary><p>أيوه. مجاني ومفتوح المصدر. من غير إعلانات ولا حساب ولا نسخة مدفوعة.</p></details>
+  <details><summary>ده برنامج ترجمة؟</summary><p>لأ. مش بيغيّر المعنى. بيعيد كتابة نفس الضغطات على كيبورد تاني، وده بالظبط اللي محتاجه لما تكتب واللغة غلط.</p></details>
+  <details><summary>محتاج إنترنت أو بيجمع بياناتي؟</summary><p>مفيش تتبّع. بيشتغل من غير إنترنت، والاستخدام الاختياري الوحيد للإنترنت هو فحص التحديثات اللي تقدر تشغّله (مقفول في الأول)، وكل اللي بيعمله إنه يسأل GitHub عن رقم آخر إصدار. نصوصك عمرها ما بتخرج من جهازك، وهو بيقرا اللي إنت محدده بس لما تضغط الاختصار.</p></details>
+  <details><summary>فين بيتحفظ الـ snippets والسجل؟</summary><p>الـ snippets بتتحفظ على جهازك بس. أما سجل التحويلات فبيتحفظ على جهازك طول ما البرنامج شغّال بس وبيتمسح لما تقفله خالص. وتقدر كمان تقفله أو تمسحه في أي وقت.</p></details>
+  <details><summary>هل الضغطتين على Shift أو Ctrl بتسجّل اللي بكتبه؟</summary><p>لأ. مقفولة في الأول، ولما تشغّلها البرنامج بيراقب توقيت ضغطات Shift أو Ctrl بس عشان يحس بالضغطتين. باقي الأزرار مش بتتقرأ ولا بتتخزن ولا بتتبعت لأي حتة. بعض برامج مكافحة الفيروسات بتحذّر من أي برنامج بيراقب الكيبورد، والكود مفتوح فتقدر تتأكد بنفسك.</p></details>
+  <details><summary>بيبوّظ الحافظة (clipboard)؟</summary><p>بيستخدمها لحظة للنسخ واللصق، وبعدين بيرجّع النص اللي كان عندك. الصور والملفات المنسوخة مش بتترجّع.</p></details>
+  <details><summary>شغّال على ماك أو لينكس؟</summary><p>لسه. دلوقتي ويندوز 10 و11 بس.</p></details>
+  <details><summary>مش شغّال في برنامج معيّن. ليه؟</summary><p>البرامج اللي شغّالة كمسؤول (Administrator) بتمنع باقي البرامج من إرسال ضغطات ليها. شغّل Keyboard Flip كمسؤول كمان، أو اتأكد إن البرنامج مش في قايمة المستثناة.</p></details>
+</div></section>
+
+<footer><div class="wrap">
+  <a class="brand" href="#top"><img src="../logo.png" alt="">Keyboard Flip</a>
+  <span>مجاني ومفتوح المصدر · © <span id="year">2026</span></span>
+  <span class="flinks"><a href="changelog.html" style="color:var(--accent)">سجل التغييرات</a><a href="https://github.com/yousseifindx5/keyboard-flip" target="_blank" rel="noopener" style="color:var(--accent)">الكود على GitHub</a></span>
+</div></footer>
+
+<script src="../site.js"></script>
+</body>
+</html>

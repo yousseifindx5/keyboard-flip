@@ -1,5 +1,5 @@
-"""Rebuilds assets/icon.ico from assets/icon.png when the PNG is newer (or the ICO is missing).
-To change the logo: replace assets/icon.png with a square PNG (512x512 is ideal) and run build.bat."""
+"""Builds assets/icon.ico from assets/icon.png only when the ICO is missing.
+To change the logo: replace assets/icon.png with a square PNG (512x512 is ideal), delete assets/icon.ico and run build.bat."""
 import os
 from PIL import Image
 
@@ -9,7 +9,7 @@ SIZES = [(16, 16), (20, 20), (24, 24), (32, 32), (40, 40), (48, 48), (64, 64), (
 os.makedirs("assets", exist_ok=True)
 if not os.path.exists(PNG):
     raise SystemExit("assets/icon.png is missing")
-if not os.path.exists(ICO) or os.path.getmtime(PNG) > os.path.getmtime(ICO):
+if not os.path.exists(ICO):  # the shipped icon.ico has hand-made sharp sizes; only rebuild it if it is missing
     Image.open(PNG).convert("RGBA").resize((256, 256), Image.LANCZOS).save(ICO, sizes=SIZES)
     print("icon.ico rebuilt from icon.png")
 else:

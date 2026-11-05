@@ -1,7 +1,7 @@
 ; Inno Setup script. build.bat runs this for you; it produces installer_output\KeyboardFlip_Setup.exe
 ; The installer ALSO creates the uninstaller (unins000.exe) and registers it in Windows Settings > Apps.
 #define AppName "Keyboard Flip"
-#define AppVersion "1.0.0"
+#define AppVersion "1.1.0"
 #define AppExe "KeyboardFlip.exe"
 
 [Setup]
@@ -74,6 +74,7 @@ begin
   begin
     // remove the "start with Windows" entry even if it was switched on inside the app
     RegDeleteValue(HKEY_CURRENT_USER, 'Software\Microsoft\Windows\CurrentVersion\Run', 'KeyboardFlip');
+    DeleteFile(ExpandConstant('{userappdata}\KeyboardFlip\history.json'));
     if MsgBox('Also delete your Keyboard Flip settings?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
       DelTree(ExpandConstant('{userappdata}\KeyboardFlip'), True, True, True);
   end;

@@ -110,6 +110,25 @@ def normalize_hotkey(text):
     return "+".join(parts)
 
 
+def combo_vks(text):
+    """'ctrl+shift+C' -> [VK_LCTRL, VK_LSHIFT, VK_C] (the keys to press together), or None."""
+    parsed = parse_hotkey(text) if isinstance(text, str) else None
+    if not parsed:
+        return None
+    mods, vk = parsed
+    keys = []
+    if mods & MOD_CONTROL:
+        keys.append(VK_LCTRL)
+    if mods & MOD_SHIFT:
+        keys.append(VK_LSHIFT)
+    if mods & MOD_ALT:
+        keys.append(0xA4)  # left Alt
+    if mods & MOD_WIN:
+        keys.append(0x5B)  # left Windows key
+    keys.append(vk)
+    return keys
+
+
 # --------------------------------------------------------------------------
 # ctypes structures
 # --------------------------------------------------------------------------
@@ -163,6 +182,9 @@ if IS_WIN:
     _sig(user32.SendInput, [U, ctypes.POINTER(INPUT), ctypes.c_int], U)
     _sig(user32.GetAsyncKeyState, [ctypes.c_int], ctypes.c_short)
     _sig(user32.GetForegroundWindow, [], _P)
+    _sig(user32.SetForegroundWindow, [_P], B)
+    _sig(user32.IsIconic, [_P], B)
+    _sig(user32.ShowWindow, [_P, ctypes.c_int], B)
     _sig(user32.GetWindowThreadProcessId, [_P, ctypes.POINTER(D)], D)
     _sig(user32.GetParent, [_P], _P)
     _sig(user32.GetWindowLongW, [_P, ctypes.c_int], ctypes.c_long)
@@ -397,6 +419,217 @@ def foreground_process_name():
     finally:
         kernel32.CloseHandle(handle)
     return ""
+
+
+def foreground_window():
+    """Handle (an int) of the window that has the keyboard focus right now, 0 if none."""
+    if not IS_WIN:
+        return 0
+    return user32.GetForegroundWindow() or 0
+
+
+def focus_window(hwnd):
+    """Give the keyboard focus back to a window (used after one of our popups closes)."""
+    if not IS_WIN or not hwnd:
+        return
+    try:
+        if user32.IsIconic(hwnd):
+            user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+        user32.SetForegroundWindow(hwnd)
+    except Exception:
+        pass
+
+
+# --------------------------------------------------------------------------
+# Double-tap Shift / Ctrl
+# --------------------------------------------------------------------------
+class TapTracker:
+    """Pure logic: tells when Shift (or Ctrl) was tapped twice quickly with no other key in between.
+
+    key(vk, down, now) is fed every key press/release. Nothing is stored except two timestamps.
+    """
+    MAX_HOLD = 0.35   # a tap is shorter than this (seconds)
+    MAX_GAP = 0.60    # both taps must finish within this time
+
+    def __init__(self, own, callback):
+        self.own, self.callback = frozenset(own), callback
+        self.down_since, self.dirty, self.last_tap = None, False, 0.0
+
+    def key(self, vk, down, now):
+        if vk in self.own:
+            if down:
+                if self.down_since is None:
+                    self.down_since, self.dirty = now, False
+                return
+            if self.down_since is None:
+                return
+            tap = not self.dirty and now - self.down_since <= self.MAX_HOLD
+            self.down_since = None
+            if tap and self.last_tap and now - self.last_tap <= self.MAX_GAP:
+                self.last_tap = 0.0
+                self.callback()
+            else:
+                self.last_tap = now if tap else 0.0
+        elif down:  # some other key: this is typing or a shortcut, not a double tap
+            self.dirty, self.last_tap = True, 0.0
+
+
+class DoubleTapListener:
+    """Calls `callback` when Shift (or Ctrl) is tapped twice quickly with nothing else pressed.
+
+    It watches only the *timing* of Shift / Ctrl presses (through a Windows keyboard notification,
+    the same mechanism AutoHotkey uses). Typed keys are never read, stored or sent anywhere.
+    If Windows refuses that, it falls back to asking "is the key down?" a hundred times a second.
+    """
+    KEYS = {"shift": (0x10, (0x10, 0xA0, 0xA1)), "ctrl": (0x11, (0x11, 0xA2, 0xA3))}
+    MAX_HOLD = TapTracker.MAX_HOLD
+    MAX_GAP = TapTracker.MAX_GAP
+
+    def __init__(self, callback):
+        self.callback = callback
+        self._thread = None
+        self._tid = None
+        self._stop = threading.Event()
+        self._name = "off"
+        self.mode = ""   # "hook" or "poll" once started
+
+    def start(self, name):
+        self.stop()
+        self._name = name
+        if not IS_WIN or name not in self.KEYS:
+            return
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, args=(self._stop, name), daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._name = "off"
+        self._stop.set()
+        if self._thread and self._thread.is_alive():
+            if self._tid and IS_WIN:
+                try:
+                    user32.PostThreadMessageW(self._tid, WM_QUIT, 0, 0)
+                except Exception:
+                    pass
+            self._thread.join(1)
+        self._thread = None
+
+    def ensure_alive(self):
+        """Start the watcher again if its thread ever died."""
+        if self._name in self.KEYS and not (self._thread and self._thread.is_alive()):
+            self.start(self._name)
+
+    # -------------------------------------------------------------- keyboard hook
+    def _run(self, stop, name):
+        vk, own = self.KEYS[name]
+        if self._run_hook(stop, own):
+            return
+        self.mode = "poll"
+        self._run_poll(stop, vk, own)
+
+    def _fire(self):
+        threading.Thread(target=self.callback, daemon=True).start()
+
+    def _run_hook(self, stop, own):
+        try:
+            hook_proc_type = ctypes.WINFUNCTYPE(ctypes.c_ssize_t, ctypes.c_int, wintypes.WPARAM, wintypes.LPARAM)
+
+            class KBDLL(ctypes.Structure):
+                _fields_ = [("vkCode", wintypes.DWORD), ("scanCode", wintypes.DWORD), ("flags", wintypes.DWORD),
+                            ("time", wintypes.DWORD), ("extra", ctypes.c_size_t)]
+
+            user32.SetWindowsHookExW.argtypes = [ctypes.c_int, hook_proc_type, ctypes.c_void_p, wintypes.DWORD]
+            user32.SetWindowsHookExW.restype = ctypes.c_void_p
+            user32.CallNextHookEx.argtypes = [ctypes.c_void_p, ctypes.c_int, wintypes.WPARAM, wintypes.LPARAM]
+            user32.CallNextHookEx.restype = ctypes.c_ssize_t
+            user32.UnhookWindowsHookEx.argtypes = [ctypes.c_void_p]
+            kernel32.GetModuleHandleW.argtypes = [wintypes.LPCWSTR]
+            kernel32.GetModuleHandleW.restype = ctypes.c_void_p
+
+            tracker = TapTracker(own, self._fire)
+
+            def proc(code, wparam, lparam):
+                try:
+                    if code >= 0:
+                        info = ctypes.cast(lparam, ctypes.POINTER(KBDLL)).contents
+                        if not info.flags & 0x10:  # ignore keys that programs (us included) inject
+                            if wparam in (0x100, 0x104):
+                                tracker.key(info.vkCode, True, time.perf_counter())
+                            elif wparam in (0x101, 0x105):
+                                tracker.key(info.vkCode, False, time.perf_counter())
+                except Exception:
+                    pass
+                return user32.CallNextHookEx(None, code, wparam, lparam)
+
+            callback = hook_proc_type(proc)  # keep a reference, or Windows calls freed memory
+            self._tid = kernel32.GetCurrentThreadId()
+            msg = wintypes.MSG()
+            user32.PeekMessageW(ctypes.byref(msg), None, WM_USER, WM_USER, 0)  # create the message queue
+            handle = user32.SetWindowsHookExW(13, callback, kernel32.GetModuleHandleW(None), 0)  # WH_KEYBOARD_LL
+            if not handle:
+                return False
+        except Exception:
+            return False
+        self.mode = "hook"
+        try:
+            while not stop.is_set() and user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
+                pass
+        finally:
+            user32.UnhookWindowsHookEx(handle)
+        return True
+
+    # ------------------------------------------------------------------ fallback
+    @staticmethod
+    def _down(vk):
+        return bool(user32.GetAsyncKeyState(vk) & 0x8000)
+
+    def _other_down(self, own):
+        return any(self._down(vk) for vk in range(8, 0xE0) if vk not in own)  # keyboard keys only (no mouse)
+
+    def _run_poll(self, stop, _vk, own):
+        down_since, dirty, last_tap = None, False, 0.0
+        while not stop.wait(0.01):
+            try:
+                now = time.perf_counter()
+                if self._down(_vk):
+                    if down_since is None:
+                        down_since, dirty = now, self._other_down(own)
+                    elif not dirty and self._other_down(own):
+                        dirty = True
+                elif down_since is not None:
+                    tap = not dirty and now - down_since <= self.MAX_HOLD
+                    down_since = None
+                    if tap and last_tap and now - last_tap <= self.MAX_GAP:
+                        last_tap = 0.0
+                        self.callback()
+                    else:
+                        last_tap = now if tap else 0.0
+                elif last_tap:
+                    if now - last_tap > self.MAX_GAP or self._other_down(own):
+                        last_tap = 0.0
+            except Exception:
+                pass
+
+
+def set_window_icon(tk_window, path):
+    """Give the window (title bar and taskbar) the icon at the exact size Windows asks for, so it stays sharp."""
+    if not IS_WIN:
+        return
+    try:
+        user32.LoadImageW.argtypes = [ctypes.c_void_p, wintypes.LPCWSTR, wintypes.UINT, ctypes.c_int,
+                                      ctypes.c_int, wintypes.UINT]
+        user32.LoadImageW.restype = ctypes.c_void_p
+        user32.SendMessageW.argtypes = [ctypes.c_void_p, wintypes.UINT, wintypes.WPARAM, ctypes.c_void_p]
+        user32.SendMessageW.restype = ctypes.c_ssize_t
+        wid = tk_window.winfo_id()
+        hwnd = user32.GetParent(wid) or wid
+        for kind, metric in ((1, 11), (0, 49)):  # ICON_BIG / SM_CXICON, ICON_SMALL / SM_CXSMICON
+            size = user32.GetSystemMetrics(metric)
+            handle = user32.LoadImageW(None, path, 1, size, size, 0x10)  # IMAGE_ICON, LR_LOADFROMFILE
+            if handle:
+                user32.SendMessageW(hwnd, 0x0080, kind, handle)  # WM_SETICON
+    except Exception:
+        pass
 
 
 def set_no_activate(tk_window):
